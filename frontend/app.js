@@ -54,9 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let latestPredictionData = null;
   let chartInstance = null;
 
-  // Smart API Base URL: auto-connects to http://127.0.0.1:5000 if opened via file:// or alternative local ports
+  // Smart API Base URL: auto-connects to http://127.0.0.1:5000 if opened via file:// or alternative local ports on localhost
   const isDirectFile = window.location.protocol === "file:" || !window.location.origin || window.location.origin === "null";
-  const API_BASE = isDirectFile || (window.location.port !== "5000" && window.location.hostname !== "")
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const API_BASE = isDirectFile || (isLocalhost && window.location.port !== "5000")
     ? "http://127.0.0.1:5000"
     : "";
 
