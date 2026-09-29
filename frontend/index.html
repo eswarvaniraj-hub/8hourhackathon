@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriYield Tamil Nadu | Crop Yield Prediction & Decision Support System</title>
+  <meta name="description" content="Agricultural crop yield prediction, scenario simulation, and explainable decision support system for Tamil Nadu, India.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"/>
+            <path d="M7 16c2-4 5-7 10-7"/>
+            <path d="M12 9c-2 2-3 5-3 7"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">AgriYield <span>TN</span></h1>
+          <p class="brand-subtitle">Crop Yield Prediction & Agronomic Intelligence • Tamil Nadu</p>
+        </div>
+      </div>
+      
+      <div class="header-meta">
+        <span class="region-badge">
+          <span class="pulse-dot"></span>
+          Tamil Nadu, India
+        </span>
+        <span class="model-badge" id="headerModelBadge">Model: Gradient Boosting (v1.0)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notice / Demo Disclaimer Banner -->
+  <div class="disclaimer-banner">
+    <div class="disclaimer-content">
+      <span class="disclaimer-tag">SYNTHETIC / DEMO DATASET</span>
+      <p>
+        <strong>Hackathon MVP Demonstration:</strong> This system uses a synthetic agro-climatic simulation dataset modeled for Tamil Nadu. Predictions are for demonstrative decision-support purposes and do <strong>not</strong> constitute guaranteed agricultural advisory.
+      </p>
+    </div>
+  </div>
+
+  <main class="main-container">
+    <!-- Presets Bar -->
+    <section class="presets-section">
+      <span class="preset-label">Quick Scenario Presets:</span>
+      <div class="preset-buttons">
+        <button type="button" class="preset-btn active" id="presetDeltaRice">🌾 Cauvery Delta Samba Rice</button>
+        <button type="button" class="preset-btn" id="presetCoimbatoreMaize">🌽 Coimbatore Irrigated Maize</button>
+        <button type="button" class="preset-btn" id="presetDroughtRisk">⚠️ Severe Drought Scenario</button>
+        <button type="button" class="preset-btn" id="presetNavaraiGroundnut">🥜 Navarai Groundnut</button>
+      </div>
+    </section>
+
+    <!-- App Grid -->
+    <div class="app-layout">
+      <!-- Left Column: Input Form -->
+      <aside class="sidebar-card">
+        <div class="card-header">
+          <h2>Agricultural Scenario Inputs</h2>
+          <span class="header-hint">Adjust parameters below</span>
+        </div>
+
+        <form id="predictionForm" class="scenario-form">
+          <!-- District Selection -->
+          <div class="form-group">
+            <label for="districtSelect">
+              <span class="label-text">District (Tamil Nadu)</span>
+              <span class="field-info" title="Target agro-ecological district">📍 Region</span>
+            </label>
+            <select id="districtSelect" name="district" required>
+              <option value="Thanjavur">Thanjavur (Cauvery Delta)</option>
+              <option value="Tiruvarur">Tiruvarur (Cauvery Delta)</option>
+              <option value="Nagapattinam">Nagapattinam (Coastal Delta)</option>
+              <option value="Tiruchirappalli">Tiruchirappalli (Central)</option>
+              <option value="Coimbatore">Coimbatore (Western)</option>
+              <option value="Erode">Erode (Western)</option>
+              <option value="Salem">Salem (North-Western)</option>
+              <option value="Madurai">Madurai (Southern)</option>
+              <option value="Dindigul">Dindigul (Southern)</option>
+              <option value="Villupuram">Villupuram (Northern)</option>
+            </select>
+          </div>
+
+          <!-- Crop Selection -->
+          <div class="form-group">
+            <label for="cropSelect">
+              <span class="label-text">Crop</span>
+              <span class="field-info">🌱 Commodity</span>
+            </label>
+            <select id="cropSelect" name="crop" required>
+              <option value="Rice (Paddy)">Rice (Paddy)</option>
+              <option value="Maize">Maize</option>
+              <option value="Groundnut">Groundnut</option>
+              <option value="Pulses">Pulses (Black/Green Gram)</option>
+            </select>
+          </div>
+
+          <!-- Season and Soil in 2 columns -->
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label for="seasonSelect">Season</label>
+              <select id="seasonSelect" name="season" required>
+                <option value="Samba">Samba (Aug–Jan)</option>
+                <option value="Kuruvai">Kuruvai (Jun–Sep)</option>
+                <option value="Navarai">Navarai (Dec–May)</option>
+              </select>
+            </div>
+            <div class="form-group col-half">
+              <label for="soilSelect">Soil Type</label>
+              <select id="soilSelect" name="soil_type" required>
+                <option value="Alluvial">Alluvial</option>
+                <option value="Red Loamy">Red Loamy</option>
+                <option value="Clayey">Clayey</option>
+                <option value="Sandy Loam">Sandy Loam</option>
+                <option value="Black Soil">Black Soil</option>
+              </select>
+            </div>
+          </div>
+
+          <hr class="form-divider">
+
+          <!-- Rainfall Slider & Input -->
+          <div class="form-group range-group">
+            <div class="range-header">
+              <label for="rainfallInput">Cumulative Seasonal Rainfall</label>
+              <span class="range-val-badge"><span id="rainfallVal">650</span> mm</span>
+            </div>
+            <input type="range" id="rainfallRange" min="50" max="1800" step="10" value="650">
+            <input type="hidden" id="rainfallInput" name="rainfall_mm" value="650">
+            <div class="range-ticks">
+              <span>50 mm (Deficit)</span>
+              <span>750 mm (Normal)</span>
+              <span>1800 mm (Excess)</span>
+            </div>
+          </div>
+
+          <!-- Temperature Slider & Input -->
+          <div class="form-group range-group">
+            <div class="range-header">
+              <label for="tempInput">Mean Seasonal Temperature</label>
+              <span class="range-val-badge"><span id="tempVal">28.0</span> °C</span>
+            </div>
+            <input type="range" id="tempRange" min="18.0" max="42.0" step="0.5" value="28.0">
+            <input type="hidden" id="tempInput" name="temperature_c" value="28.0">
+            <div class="range-ticks">
+              <span>18°C (Mild)</span>
+              <span>28°C (Optimum)</span>
+              <span>42°C (Heat stress)</span>
+            </div>
+          </div>
+
+          <!-- Irrigation Slider & Input -->
+          <div class="form-group range-group">
+            <div class="range-header">
+              <label for="irrigationInput">Assured Irrigation Access</label>
+              <span class="range-val-badge"><span id="irrigationVal">85</span> %</span>
+            </div>
+            <input type="range" id="irrigationRange" min="0" max="100" step="5" value="85">
+            <input type="hidden" id="irrigationInput" name="irrigation_pct" value="85">
+            <div class="range-ticks">
+              <span>0% (Rainfed only)</span>
+              <span>50% (Partial)</span>
+              <span>100% (Full canal/well)</span>
+            </div>
+          </div>
+
+          <!-- Fertilizer Input -->
+          <div class="form-group range-group">
+            <div class="range-header">
+              <label for="fertilizerInput">NPK Fertilizer Application</label>
+              <span class="range-val-badge"><span id="fertilizerVal">135</span> kg/ha</span>
+            </div>
+            <input type="range" id="fertilizerRange" min="10" max="350" step="5" value="135">
+            <input type="hidden" id="fertilizerInput" name="fertilizer_kg_per_ha" value="135">
+            <div class="range-ticks">
+              <span>10 kg/ha (Minimal)</span>
+              <span>130 kg/ha (Standard)</span>
+              <span>350 kg/ha (High)</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="predictBtn" class="btn-predict">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">Run Yield Prediction</span>
+            <span class="spinner" id="btnSpinner"></span>
+          </button>
+        </form>
+      </aside>
+
+      <!-- Right Column: Results & Visualization -->
+      <section class="results-container">
+        <!-- Error Alert -->
+        <div id="errorAlert" class="error-banner" style="display: none;">
+          <span class="error-icon">⚠️</span>
+          <div id="errorMessage" class="error-text"></div>
+        </div>
+
+        <!-- Metric Cards Grid -->
+        <div class="metric-cards-grid">
+          <!-- Card 1: Predicted Yield -->
+          <div class="metric-card primary-card">
+            <div class="metric-header">
+              <span class="card-eyebrow">PREDICTED YIELD</span>
+              <span class="pill-badge" id="yieldUnitBadge">kg/ha</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-primary-val" id="predictedYieldVal">--</div>
+              <div class="metric-secondary-val" id="predictedYieldTonnes">-- tonnes / hectare</div>
+            </div>
+            <div class="metric-footer" id="uncertaintyText">
+              Uncertainty: ± -- kg/ha (95% CI)
+            </div>
+          </div>
+
+          <!-- Card 2: Historical Benchmark -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="card-eyebrow">HISTORICAL DEMO BENCHMARK</span>
+              <span class="pill-badge neutral" id="benchmarkDistrictBadge">Thanjavur</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-primary-val" id="historicalYieldVal">--</div>
+              <div class="metric-secondary-val" id="historicalYieldTonnes">-- tonnes / hectare</div>
+            </div>
+            <div class="metric-footer">
+              10-Year District Baseline
+            </div>
+          </div>
+
+          <!-- Card 3: Comparison Delta -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="card-eyebrow">SCENARIO VS HISTORICAL</span>
+              <span class="status-indicator" id="statusPill">Evaluating</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-primary-val" id="deltaVal">--</div>
+              <div class="metric-secondary-val" id="deltaKgVal">-- kg/ha difference</div>
+            </div>
+            <div class="metric-footer" id="deltaContext">
+              Variance relative to historical mean
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualization Tabs / Charts Area -->
+        <div class="visuals-card">
+          <div class="tabs-header">
+            <div class="tabs-nav">
+              <button class="tab-btn active" id="tabHistChart">Scenario vs Historical</button>
+              <button class="tab-btn" id="tabCropChart">Multi-Crop Feasibility</button>
+            </div>
+            <span class="chart-tag" id="chartContextTag">Thanjavur • Rice (Paddy)</span>
+          </div>
+
+          <div class="chart-wrapper">
+            <canvas id="yieldChart" height="230"></canvas>
+          </div>
+        </div>
+
+        <!-- Transparent Agronomic Recommendations -->
+        <div class="advisory-card">
+          <div class="advisory-header">
+            <div class="advisory-title-group">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <h3>Explainable Agronomic Advisory & Risk Flags</h3>
+            </div>
+            <span class="safety-tag">Rule-Based Decision Support</span>
+          </div>
+
+          <div id="recommendationsList" class="recommendations-container">
+            <div class="empty-state">
+              <p>Configure inputs and click <strong>Run Yield Prediction</strong> to see agronomic advisory flags and moisture/nutrient risk evaluations.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Information & Data Coverage Footer Card -->
+        <div class="info-card">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Active ML Model</span>
+              <span class="info-val" id="infoModelName">Gradient Boosting Regressor</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temporal Test R²</span>
+              <span class="info-val" id="infoModelR2">0.9798</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Test MAE (Error)</span>
+              <span class="info-val" id="infoModelMAE">155.6 kg/ha</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Training Period</span>
+              <span class="info-val">2012 – 2019 (Temporal Split)</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Target Metric</span>
+              <span class="info-val">Yield in kg/ha</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data Architecture</span>
+              <span class="info-val">Modular Pipeline (Ready for Real Data)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <p>Claudrix Agri • Tamil Nadu Agricultural Yield Prediction MVP • Hackathon 2026</p>
+      <p class="footer-disclaimer">
+        Disclaimer: This application uses synthetic demonstration data for hackathon evaluation and does not replace official agricultural extension services.
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "initial_row_count": 3017,
+  "duplicates_removed": 8,
+  "missing_values_imputed": {
+    "Irrigation_Pct": 1,
+    "Fertilizer_kg_per_ha": 1
+  },
+  "invalid_locations_dropped": 0,
+  "invalid_seasons_dropped": 0,
+  "outliers_dropped": 0,
+  "final_row_count": 3009,
+  "missing_values_detected": {
+    "Irrigation_Pct": 1,
+    "Fertilizer_kg_per_ha": 1
+  }
+}
