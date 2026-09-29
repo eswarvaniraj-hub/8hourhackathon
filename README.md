@@ -69,12 +69,17 @@ Claudrix Agri/
 │   └── inference/
 │       └── predict_service.py                  # Prediction service, uncertainty & rule advisories
 ├── backend/
-│   ├── app.py                                  # Flask REST API + Static Dashboard Host
+│   ├── app.py                                  # Flask REST API serving / and /dashboard routes
+│   ├── gemini_service.py                       # Bilingual Gemini 2.5 Flash GenAI advisor
+│   ├── .env.example                            # Template for GEMINI_API_KEY
 │   └── requirements.txt                        # Backend dependencies
 ├── frontend/
-│   ├── index.html                              # Responsive dashboard UI
-│   ├── styles.css                              # Glassmorphic, modern responsive styling
-│   └── app.js                                  # Chart.js visualization & interactive controls
+│   ├── index.html                              # Two-stage single-page application (Landing + Dashboard)
+│   ├── styles.css                              # Glassmorphic, modern responsive styling & 3D layout
+│   ├── landing3d.js                            # Three.js 3D agricultural scene & AI core stream
+│   ├── app.js                                  # Two-stage routing, Chart.js, presets & AgriBot client
+│   └── vendor/
+│       └── three.min.js                        # Bundled Three.js library (no external CDN dependency)
 ├── docs/
 │   └── architecture.md                         # Architecture diagrams & component flows
 └── README.md
@@ -87,6 +92,20 @@ Claudrix Agri/
 ### Prerequisites
 - Python 3.10+
 - Installed packages: `pip install -r backend/requirements.txt`
+- (Optional) Google Gemini API Key in `backend/.env` for the AgriBot AI assistant:
+  ```bash
+  cp backend/.env.example backend/.env
+  # Set GEMINI_API_KEY=your_key_here in backend/.env
+  ```
+
+### Running the Application
+1. Start the Flask application server:
+   ```bash
+   python backend/app.py
+   ```
+2. Open your browser:
+   - **3D Landing Page**: `http://127.0.0.1:5000/`
+   - **Interactive Yield Dashboard**: `http://127.0.0.1:5000/dashboard`
 
 ### Step 1: (Optional) Re-run Data Ingestion and Training
 If you modify data or add real datasets:

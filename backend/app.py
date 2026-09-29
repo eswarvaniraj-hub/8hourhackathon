@@ -40,6 +40,16 @@ def serve_index():
     """Serve frontend index.html."""
     return send_from_directory(app.static_folder, "index.html")
 
+@app.route("/dashboard")
+def serve_dashboard():
+    """Serve frontend index.html for the /dashboard route."""
+    return send_from_directory(app.static_folder, "index.html")
+
+@app.route("/simulation")
+def serve_simulation():
+    """Serve frontend index.html for the /simulation route."""
+    return send_from_directory(app.static_folder, "index.html")
+
 @app.route("/<path:path>")
 def serve_static(path):
     """Serve static frontend files."""
@@ -90,8 +100,12 @@ def predict():
         
     return jsonify(result), 200
 
-@app.route("/api/crop-comparison", methods=["POST"])
+from backend.gemini_service import gemini_service
+
+@app.route("/api/crop-comparison", methods=["POST", "OPTIONS"])
 def crop_comparison():
+    if request.method == "OPTIONS":
+        return "", 204
     """
     Simulate predicted yields across all supported crops under identical conditions.
     """
@@ -108,7 +122,47 @@ def crop_comparison():
         "comparison": comparison
     }), 200
 
+@app.route("/api/chat/status", methods=["GET"])
+def chat_status():
+    """Returns Gemini assistant readiness status without leaking key values."""
+    return jsonify({
+        "available": gemini_service.is_available(),
+        "supported_languages": ["en", "ta"],
+        "voice_supported": True
+    }), 200
+
+@app.route("/api/chat", methods=["POST", "OPTIONS"])
+def chat():
+    """
+    Agricultural AI Chatbot endpoint powered by Gemini.
+    Accepts: { message: str, language: 'en' | 'ta', context: dict }
+    Returns: { success: bool, reply: str, language: str, model_used: str }
+    """
+    if request.method == "OPTIONS":
+        return "", 204
+
+    data = request.get_json(silent=True)
+    if not data or "message" not in data:
+        return jsonify({
+            "success": False,
+            "error": "Missing 'message' in request body."
+        }), 400
+
+    user_msg = str(data.get("message", "")).strip()
+    language = str(data.get("language", "en")).strip().lower()
+    context = data.get("context", None)
+
+    response = gemini_service.generate_chat_response(
+        user_message=user_msg,
+        language=language,
+        context=context
+    )
+
+    status_code = 200 if response.get("success") else 500
+    return jsonify(response), status_code
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting Agricultural Yield API on port {port}...")
     app.run(host="0.0.0.0", port=port, debug=False)
+
