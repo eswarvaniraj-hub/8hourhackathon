@@ -54,6 +54,25 @@ document.addEventListener("DOMContentLoaded", () => {
   let latestPredictionData = null;
   let chartInstance = null;
 
+  // Smart API Base URL: auto-connects to http://127.0.0.1:5000 if opened via file:// or alternative local ports
+  const isDirectFile = window.location.protocol === "file:" || !window.location.origin || window.location.origin === "null";
+  const API_BASE = isDirectFile || (window.location.port !== "5000" && window.location.hostname !== "")
+    ? "http://127.0.0.1:5000"
+    : "";
+
+  // Safe JSON response parser
+  async function safeJson(response) {
+    const rawText = await response.text();
+    if (!rawText || rawText.trim() === "") {
+      throw new Error(`Empty response from server (Status ${response.status}). Ensure backend server is running on port 5000.`);
+    }
+    try {
+      return JSON.parse(rawText);
+    } catch (e) {
+      throw new Error(`Server returned non-JSON data (${response.status} ${response.statusText}): ${rawText.slice(0, 120)}`);
+    }
+  }
+
   // Sync Sliders
   function setupSlider(rangeEl, inputEl, displayEl, unit = "") {
     rangeEl.addEventListener("input", (e) => {
@@ -150,9 +169,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fetch API Metadata on load
   async function loadMetadata() {
     try {
-      const res = await fetch("/api/metadata");
+      const res = await fetch(`${API_BASE}/api/metadata`);
       if (res.ok) {
-        const data = await res.json();
+        const data = await safeJson(res);
         const meta = data.metadata;
         if (meta) {
           const badge = document.getElementById("headerModelBadge");
@@ -190,13 +209,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const response = await fetch("/api/predict", {
+      const response = await fetch(`${API_BASE}/api/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
+      const result = await safeJson(response);
 
       if (!response.ok || !result.success) {
         const errs = result.errors ? result.errors.join("<br>") : "Prediction request failed.";
@@ -214,7 +233,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
     } catch (error) {
-      showError(`Network connection error: ${error.message}. Ensure backend server is running.`);
+      let extra = `Ensure backend server is running on port 5000.`;
+      if (isDirectFile) {
+        extra += `<br><br>💡 <em>Tip: You opened index.html directly from your folder (file://). To access the complete app, open <a href="http://127.0.0.1:5000" target="_blank" style="color:#38bdf8;text-decoration:underline;">http://127.0.0.1:5000</a> in your browser.</em>`;
+      }
+      showError(`Network connection error: ${error.message}<br><small style="opacity:0.85">${extra}</small>`);
     } finally {
       predictBtn.classList.remove("loading");
       predictBtn.disabled = false;
@@ -356,12 +379,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chartInstance) chartInstance.destroy();
 
     try {
-      const res = await fetch("/api/crop-comparison", {
+      const res = await fetch(`${API_BASE}/api/crop-comparison`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(currentPayload)
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok || !data.success) return;
 
       const crops = data.comparison.map(c => c.crop);
