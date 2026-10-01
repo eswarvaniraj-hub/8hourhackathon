@@ -259,10 +259,25 @@ document.addEventListener("DOMContentLoaded", () => {
     predictedYieldTonnes.textContent = `${pred.yield_tonnes_per_ha} tonnes / hectare`;
     uncertaintyText.textContent = `Uncertainty: ±${pred.uncertainty_range.margin_kg_ha} kg/ha (${pred.uncertainty_range.lower_bound_kg_ha.toLocaleString()} - ${pred.uncertainty_range.upper_bound_kg_ha.toLocaleString()})`;
 
+    // Farmer unit conversions (Tamil Nadu local units: Quintals & Bags/acre)
+    const predQPerHa = (pred.yield_kg_per_ha / 100).toFixed(1);
+    const predBagsAcre = (pred.yield_kg_per_ha / 75 / 2.47105).toFixed(1);
+    const predictedFarmerUnits = document.getElementById("predictedFarmerUnits");
+    if (predictedFarmerUnits) {
+      predictedFarmerUnits.innerHTML = `≈ <strong>${predQPerHa}</strong> Quintals/ha • <strong>${predBagsAcre}</strong> Bags/acre (75kg)`;
+    }
+
     // 2. Historical Baseline
     historicalYieldVal.textContent = hist.historical_avg_yield_kg_ha.toLocaleString();
     historicalYieldTonnes.textContent = `${hist.historical_avg_yield_t_ha} tonnes / hectare`;
     benchmarkDistrictBadge.textContent = `${hist.district} • ${hist.crop}`;
+
+    const histQPerHa = (hist.historical_avg_yield_kg_ha / 100).toFixed(1);
+    const histBagsAcre = (hist.historical_avg_yield_kg_ha / 75 / 2.47105).toFixed(1);
+    const historicalFarmerUnits = document.getElementById("historicalFarmerUnits");
+    if (historicalFarmerUnits) {
+      historicalFarmerUnits.innerHTML = `≈ <strong>${histQPerHa}</strong> Quintals/ha (${histBagsAcre} bags/acre)`;
+    }
 
     // 3. Delta
     const diffPct = hist.difference_percentage;
@@ -271,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     deltaKgVal.textContent = `${isPositive ? "+" : ""}${hist.difference_kg_ha.toLocaleString()} kg/ha vs historical`;
 
     statusPill.className = "status-indicator " + (isPositive ? "positive" : "negative");
-    statusPill.textContent = isPositive ? "Favorable" : "Yield Deficit";
+    statusPill.textContent = isPositive ? "Favorable Outlook" : "Deficit Risk";
 
     chartContextTag.textContent = `${hist.district} • ${hist.crop} (${data.inputs_echo.Season})`;
 
@@ -516,8 +531,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const greetings = {
-    en: "Vanakkam! I am your <strong>AgriBot AI Assistant</strong>. Ask me anything about crop cultivation, soil health, water management, or pest control in Tamil Nadu! Click the <strong>microphone (🎙️)</strong> to speak in English or தமிழ்.",
-    ta: "வணக்கம்! நான் உங்கள் <strong>அக்ரி-ஈல்டு உழவர் தோழன்</strong>. தமிழ்நாட்டில் பயிர் சாகுபடி, மண் நலம், உரம், பூச்சி கட்டுப்பாடு குறித்து எதையும் கேளுங்கள்! <strong>மைக் (🎙️)</strong> பட்டனை அழுத்தி தமிழில் பேசலாம்."
+    en: "Vanakkam! I am <strong>உழவர் தோழன் (Farmer’s Friend)</strong>, your Tamil Nadu agronomic advisor. Ask me anything about crop cultivation, soil health, water management, or pest control across Tamil Nadu agro-climatic zones! Click the <strong>microphone (🎙️)</strong> to speak in English or தமிழ்.",
+    ta: "வணக்கம்! நான் உங்கள் <strong>உழவர் தோழன்</strong>. தமிழ்நாட்டில் பயிர் சாகுபடி, மண் நலம், உரம், பூச்சி கட்டுப்பாடு குறித்து எதையும் கேளுங்கள்! <strong>மைக் (🎙️)</strong> பட்டனை அழுத்தி தமிழில் பேசலாம்."
   };
 
   const placeholders = {
